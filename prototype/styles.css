@@ -1,0 +1,436 @@
+/* Prototype: single-screen homepage + scrollable sub-pages, dark theme.
+   Anthropic-inspired layout: thin fixed top bar, nav on the left, logo
+   on the right that "shifts" (shrinks + rotates) once the page scrolls.
+   The homepage never scrolls, so its logo never shifts. */
+
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+
+html,
+body {
+    margin: 0;
+    padding: 0;
+}
+
+:root {
+    --bg: #242424;
+    --bg-elev: #2c2c2c;
+    --text: #ebebeb;
+    --muted: #9a9a9a;
+    --accent: #c89a6a;
+    --line: rgba(235, 235, 235, 0.12);
+    --font-sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+        Helvetica, Arial, sans-serif;
+    --bar-h: 4.5rem;
+    --maxw: 1080px;
+}
+
+body {
+    background-color: var(--bg);
+    color: var(--text);
+    font-family: var(--font-sans);
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+}
+
+/* Soft clay glow up near the logo, a nod to Anthropic's warm palette. */
+body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    background: radial-gradient(
+        1100px 560px at 78% 12%,
+        rgba(200, 154, 106, 0.1),
+        transparent 60%
+    );
+}
+
+a {
+    color: inherit;
+}
+
+/* ---------- Top bar ---------- */
+
+.topbar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: var(--bar-h);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0 clamp(1.25rem, 4vw, 3rem);
+    z-index: 50;
+    transition: background-color 0.3s ease, border-color 0.3s ease,
+        backdrop-filter 0.3s ease;
+    border-bottom: 1px solid transparent;
+}
+
+.topbar.scrolled {
+    background-color: rgba(36, 36, 36, 0.72);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border-bottom-color: var(--line);
+}
+
+.nav {
+    display: flex;
+    gap: clamp(0.9rem, 2.5vw, 2.25rem);
+}
+
+.nav a {
+    font-size: 0.78rem;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    color: var(--muted);
+    text-decoration: none;
+    padding: 0.35rem 0;
+    border-bottom: 2px solid transparent;
+    transition: color 0.2s ease, border-color 0.2s ease;
+}
+
+.nav a:hover {
+    color: var(--text);
+}
+
+.nav a.active {
+    color: var(--text);
+    border-bottom-color: var(--accent);
+}
+
+/* Logo, top right. The GIF stays a constant size (like the nav items); the
+   name is collapsed until you hover the icon, then it unfurls to the right as
+   the icon slides left to make room. */
+.logo {
+    display: inline-flex;
+    align-items: center;
+    text-decoration: none;
+    color: var(--text);
+}
+
+.logo-mark {
+    width: 1.55rem;
+    height: 1.55rem;
+    flex: none;
+    display: block;
+    border-radius: 4px;
+    image-rendering: pixelated;
+}
+
+.logo-word {
+    font-weight: 700;
+    font-size: 1.15rem;
+    letter-spacing: 0.01em;
+    white-space: nowrap;
+    overflow: hidden;
+    max-width: 0;
+    opacity: 0;
+    margin-left: 0;
+    transition: max-width 0.35s cubic-bezier(0.4, 0, 0.2, 1),
+        opacity 0.3s ease, margin-left 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Hover (or keyboard focus) the icon to reveal the name. */
+.logo:hover .logo-word,
+.logo:focus-visible .logo-word {
+    max-width: 12rem;
+    opacity: 1;
+    margin-left: 0.55rem;
+}
+
+/* ---------- Home (single screen, no scroll) ---------- */
+
+body.home {
+    height: 100vh;
+    overflow: hidden;
+}
+
+.hero {
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    max-width: var(--maxw);
+    margin: 0 auto;
+    padding: var(--bar-h) clamp(1.25rem, 6vw, 5rem) 0;
+}
+
+.eyebrow {
+    color: var(--accent);
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+    font-size: 0.8rem;
+    font-weight: 600;
+    margin: 0 0 1.25rem;
+}
+
+.hero h1 {
+    font-size: clamp(2.75rem, 9vw, 6.5rem);
+    font-weight: 800;
+    line-height: 1.02;
+    letter-spacing: -0.025em;
+    margin: 0 0 1.5rem;
+}
+
+.hero .lede {
+    color: var(--muted);
+    font-size: clamp(1rem, 1.5vw, 1.2rem);
+    line-height: 1.65;
+    max-width: 56ch;
+    margin: 0 0 2.25rem;
+}
+
+.hero .lede strong {
+    color: var(--text);
+    font-weight: 600;
+}
+
+/* ---------- Social row / icons ---------- */
+
+.social {
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+}
+
+.icon-link {
+    width: 1.6rem;
+    height: 1.6rem;
+    display: inline-flex;
+    color: var(--muted);
+    transition: color 0.2s ease, transform 0.2s ease;
+}
+
+.icon-link:hover {
+    color: var(--text);
+    transform: translateY(-2px);
+}
+
+.icon-link svg {
+    width: 100%;
+    height: 100%;
+    fill: currentColor;
+}
+
+.email-link {
+    color: var(--muted);
+    text-decoration: none;
+    font-size: 0.95rem;
+    padding-bottom: 2px;
+    border-bottom: 1px solid var(--line);
+    transition: color 0.2s ease, border-color 0.2s ease;
+}
+
+.email-link:hover {
+    color: var(--text);
+    border-bottom-color: var(--accent);
+}
+
+/* ---------- Sub-pages (scrollable) ---------- */
+
+.page {
+    max-width: 880px;
+    margin: 0 auto;
+    padding: calc(var(--bar-h) + 3.5rem) clamp(1.25rem, 6vw, 3rem) 5rem;
+}
+
+.page-title {
+    font-size: clamp(2rem, 5vw, 3.25rem);
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    margin: 0 0 1rem;
+}
+
+.page-intro {
+    color: var(--muted);
+    font-size: 1.1rem;
+    line-height: 1.75;
+    max-width: 62ch;
+    margin: 0 0 3.25rem;
+}
+
+.section-label {
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    font-size: 0.75rem;
+    color: var(--accent);
+    margin: 0 0 1.25rem;
+}
+
+/* Project cards */
+.cards {
+    display: grid;
+    gap: 1.25rem;
+}
+
+.card {
+    display: block;
+    text-decoration: none;
+    color: inherit;
+    background: var(--bg-elev);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    padding: 1.5rem 1.6rem;
+    transition: transform 0.2s ease, border-color 0.2s ease;
+}
+
+.card:hover {
+    transform: translateY(-3px);
+    border-color: rgba(200, 154, 106, 0.5);
+}
+
+.card h3 {
+    margin: 0 0 0.5rem;
+    font-size: 1.2rem;
+    font-weight: 700;
+}
+
+.card p {
+    margin: 0;
+    color: var(--muted);
+    font-size: 0.98rem;
+}
+
+.card .tag {
+    display: inline-block;
+    margin-top: 1rem;
+    font-size: 0.72rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--accent);
+}
+
+/* Photo grid (gradient placeholders for the prototype) */
+.gallery {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+}
+
+.tile {
+    aspect-ratio: 4 / 3;
+    border-radius: 12px;
+    border: 1px solid var(--line);
+    display: flex;
+    align-items: flex-end;
+    padding: 0.85rem;
+    font-size: 0.8rem;
+    letter-spacing: 0.04em;
+    color: rgba(235, 235, 235, 0.85);
+    background: linear-gradient(145deg, #34302b, #232323);
+    transition: transform 0.2s ease;
+}
+
+.tile:nth-child(3n + 2) {
+    background: linear-gradient(145deg, #2f3338, #232323);
+}
+
+.tile:nth-child(3n) {
+    background: linear-gradient(145deg, #3a322c, #232323);
+}
+
+.tile:hover {
+    transform: scale(1.02);
+}
+
+/* Food list */
+.list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.list li {
+    display: flex;
+    justify-content: space-between;
+    gap: 1.5rem;
+    padding: 1.1rem 0;
+    border-bottom: 1px solid var(--line);
+}
+
+.list li:first-child {
+    border-top: 1px solid var(--line);
+}
+
+.list .name {
+    font-weight: 600;
+}
+
+.list .meta {
+    color: var(--muted);
+    font-size: 0.92rem;
+    white-space: nowrap;
+}
+
+/* Contact */
+.contact-grid {
+    display: grid;
+    gap: 1.25rem;
+    max-width: 480px;
+}
+
+.contact-row {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1.1rem 1.25rem;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    text-decoration: none;
+    color: inherit;
+    background: var(--bg-elev);
+    transition: border-color 0.2s ease, transform 0.2s ease;
+}
+
+.contact-row:hover {
+    border-color: rgba(200, 154, 106, 0.5);
+    transform: translateY(-2px);
+}
+
+.contact-row .icon-link {
+    pointer-events: none;
+}
+
+.page-footer {
+    max-width: 880px;
+    margin: 0 auto;
+    padding: 2rem clamp(1.25rem, 6vw, 3rem) 3rem;
+    color: var(--muted);
+    font-size: 0.82rem;
+    border-top: 1px solid var(--line);
+}
+
+/* ---------- Responsive ---------- */
+
+@media (max-width: 640px) {
+    .nav a {
+        font-size: 0.7rem;
+    }
+    .logo-word {
+        display: none;
+    }
+    .gallery {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+/* Keep the homepage on one screen even on short viewports. */
+@media (max-height: 600px) {
+    .hero h1 {
+        font-size: clamp(2rem, 7vw, 3.25rem);
+    }
+    .hero .lede {
+        font-size: 0.95rem;
+        margin-bottom: 1.5rem;
+    }
+    .eyebrow {
+        margin-bottom: 0.75rem;
+    }
+}
